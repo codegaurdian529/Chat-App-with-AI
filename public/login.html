@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chattie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; font-family: "Poppins", Arial, sans-serif; background: #fde9e7;
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .screen {
+      width: 100%; max-width: 420px; min-height: 100vh; min-height: 100dvh;
+      background: #7c7ba0; color: #fff; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 28px; text-align: center;
+    }
+    @media (min-width: 500px) {
+      .screen { min-height: 740px; max-height: 94vh; border-radius: 32px;
+                box-shadow: 0 12px 40px rgba(90, 80, 130, 0.25); }
+    }
+    .blob { position: absolute; border-radius: 50%; }
+    .b1 { width: 300px; height: 300px; background: #8d8bb0; top: -100px; right: -90px; }
+    .b2 { width: 340px; height: 340px; background: #6b6a92; bottom: -140px; left: -110px; }
+    .content {
+      position: relative; z-index: 1; width: 100%;
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+    }
+    .logo { font-family: "Pacifico", cursive; font-size: 46px; }
+    .tag { margin: 0; font-size: 14px; line-height: 1.6; max-width: 280px; }
+    .btn {
+      border: none; border-radius: 30px; padding: 14px 34px; font-size: 16px;
+      font-weight: 600; font-family: inherit; cursor: pointer;
+      background: #f9a19b; color: #fff;
+    }
+    .btn.light { background: #fff; color: #7c7ba0; }
+    input {
+      width: 100%; padding: 14px 18px; font-size: 16px; font-family: inherit;
+      border: none; border-radius: 26px; outline: none;
+    }
+    .row { display: flex; gap: 10px; width: 100%; }
+    .row .btn { flex: 1; padding: 14px 10px; }
+    #error { min-height: 20px; margin: 0; color: #ffd6d3; font-size: 14px; }
+    .back { color: #fff; opacity: 0.85; font-size: 14px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+
+    <!-- Welcome screen -->
+    <div class="content" id="splash">
+      <div class="logo">Chattie</div>
+      <svg viewBox="0 0 260 200" width="240" aria-hidden="true">
+        <circle cx="130" cy="130" r="64" fill="#9a98bf"/>
+        <ellipse cx="130" cy="130" rx="64" ry="22" fill="none" stroke="#b3b1d3" stroke-width="3"/>
+        <rect x="38" y="30" width="96" height="52" rx="16" fill="#f9a19b"/>
+        <polygon points="58,82 58,100 76,82" fill="#f9a19b"/>
+        <circle cx="64" cy="56" r="5" fill="#fff"/>
+        <circle cx="86" cy="56" r="5" fill="#fff"/>
+        <circle cx="108" cy="56" r="5" fill="#fff"/>
+        <rect x="136" y="64" width="90" height="48" rx="16" fill="#fff"/>
+        <polygon points="200,112 200,130 182,112" fill="#fff"/>
+        <rect x="152" y="80" width="58" height="7" rx="3.5" fill="#d9d8ea"/>
+        <rect x="152" y="94" width="38" height="7" rx="3.5" fill="#d9d8ea"/>
+      </svg>
+      <p class="tag">Chat with friends, share photos and videos, and ask the AI anything.</p>
+      <button class="btn" onclick="showForm(true)">Start Messaging</button>
+    </div>
+
+    <!-- Login / sign up form -->
+    <form class="content" id="authCard" hidden onsubmit="event.preventDefault(); auth('login')">
+      <div class="logo">Chattie</div>
+      <input id="username" placeholder="Username" autocomplete="username">
+      <input id="password" type="password" placeholder="Password (6+ characters)"
+             autocomplete="current-password">
+      <div class="row">
+        <button class="btn" type="submit">Login</button>
+        <button class="btn light" type="button" onclick="auth('signup')">Sign up</button>
+      </div>
+      <p id="error"></p>
+      <a href="#" class="back" onclick="showForm(false); return false;">← Back</a>
+    </form>
+  </div>
+
+  <script>
+    function showForm(show) {
+      document.getElementById("splash").hidden = show;
+      document.getElementById("authCard").hidden = !show;
+    }
+
+    async function auth(type) {
+      const res = await fetch("/api/" + type, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: document.getElementById("username").value,
+          password: document.getElementById("password").value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById("error").textContent = data.error;
+        return;
+      }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      window.location.href = "/index.html";
+    }
+  </script>
+</body>
+</html>
